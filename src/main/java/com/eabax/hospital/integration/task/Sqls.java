@@ -4,15 +4,15 @@ class Sqls {
 
   static String selLastOutLog = "select top 1 * from EabaxOutLog order by id desc";
 
-  static String selLastInLog = "select top 1 * from MmInLog order by id desc";
+  static String selLastInLog = "select top 1 * from EabaxInLog order by id desc";
 
   static String insOutLog = "insert into EabaxOutLog "
       + "(process_time, department_id, disposible_item_id, supplier_id, activity_id) "
       + "values (?, ?, ?, ?, ?)";
 
   static String insInLog = "insert into EabaxInLog "
-      + "(process_time, instrm_set_id, out_activity_id, in_activity_id) "
-      + "values (?, ?, ?, ?)";
+      + "(process_time, instrm_set_id, mm_activity_id) "
+      + "values (?, ?, ?)";
 
   static String selDept = "select lngdepartmentid, strdepartmentcode, strfullname from department "
       + "where lngdepartmentid > ? order by lngdepartmentid";
@@ -69,8 +69,10 @@ class Sqls {
   public static String selInstrmSets = "select * from InstrumentSet where update_time > ?";
   
   public static String insInstrmSet = "insert into item (lngitemid, stritemcode, stritemname, "
-      + "lngpurchaseunitid, lngsaleunitid, lngstockunitid, lngcalcunitid, dblsaleprice, dblsaleprice1) "
-      + "values (item_seq.nextval, ?, ?, ?, ?, ?, ?, ?, ?)";
+      + "lngpurchaseunitid, lngsaleunitid, lngstockunitid, lngcalcunitid, dblsaleprice, dblsaleprice1, "
+      + "lngitemtypeid, lngitemnatureid, "
+      + "strpackunit, bytstatus, lngorganizationid, lngitemunitgroupid, dblpackfactor) "
+      + "values (item_seq.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
   
   public static String selMmActivities = "select * from MmActivity where update_time > ?";
   
@@ -92,7 +94,7 @@ class Sqls {
       + "dblcurrprice, dblcurrpricetax, dblcurramount, dblamount, dblcostamount, dblavgcostamount) "
       + "values (itemactivitydetail_seq.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
   
-  public static String selUnitName = "select lngunitid from itemunit "
+  public static String selUnit = "select lngunitid, lngitemunitgroupid from itemunit "
       + "where strunitname = ? and rownum = 1 order by lngunitid";
   
   public static String selOperatorName = "select lngoperatorid from operator where stroperatorcode = ?";

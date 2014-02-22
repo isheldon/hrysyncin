@@ -14,8 +14,8 @@ CREATE TABLE [MmActivity](
  [billmaker_no] [varchar](50) NOT NULL, /*制单人编码*/
  [bill_date] [datetime] NOT NULL,  /*制单日期*/
  [update_time] [datetime] NOT NULL    /*修改日期*/
-)
+);
 
 insert into EabaxInLog 
-(process_time, instrm_set_id, out_activity_id, in_activity_id)
-values ( getdate(), 0, 0, 0);
+(process_time, instrm_set_id, mm_activity_id)
+values ( getdate(), 0, 0);

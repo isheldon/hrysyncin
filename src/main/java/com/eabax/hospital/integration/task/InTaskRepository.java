@@ -1,5 +1,6 @@
 package com.eabax.hospital.integration.task;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -45,6 +46,8 @@ public class InTaskRepository {
     List<InstrmSet> sets = this.getInteInstrmSets(log);
     this.refineInstrmSets(sets);
     data.instrmSets = sets;
+    LOG.debug("There are " + sets.size() + " instrument sets to be sync.");
+    //LOG.debug(sets.toString());
     
     data.maxInReceiptNo = this.getMaxReceiptNo(11L, "GYS");
     data.maxOutReceiptNo = this.getMaxReceiptNo(21L, "GYS");
@@ -52,6 +55,8 @@ public class InTaskRepository {
     List<MmActivity> activities = this.getInteMmActivities(log);
     this.refineMmActivities(activities);
     data.mmActivities = activities;
+    LOG.debug("There are " + activities.size() + " mmActivities to be sync.");
+    LOG.debug(activities.toString());
   }
   
   /**
@@ -102,14 +107,18 @@ public class InTaskRepository {
       eabaxJdbc.update(Sqls.insInstrmSet,
           new Object[] {set.no, set.name,
           set.unitId, set.unitId, set.unitId, set.unitId,
-          set.price, set.price} );
+          set.price, set.price,
+          set.type, set.nature,
+          set.unit, set.status, set.orgId, set.unitGroupId, set.packFactor} );
     }
     return sets.get(sets.size() - 1).id;
   }
 
   private void refineInstrmSets(List<InstrmSet> sets) {
     for (InstrmSet set:sets) {
-      set.unitId  = this.getUnitIdByName(set.unit);
+      Map<String, Long> unit = this.getUnitByName(set.unit);
+      set.unitId  = unit.get("unitId");
+      set.unitGroupId = unit.get("unitGroupId");
     }
   }
   
@@ -121,10 +130,12 @@ public class InTaskRepository {
   private void refineMmActivities(List<MmActivity> activities) {
     for (MmActivity act: activities) {
       act.seqValue = this.getNextSeqValue("itemactivity_seq");
-      Map<String, Long> info = this.getItemInfobyNo(act.itemNo);
-      act.itemId = info.get("itemId");
-      act.itemUnitId = info.get("unitId");
-      act.itemPositionId = info.get("positionId");
+      Map<String, Object> info = this.getItemInfobyNo(act.itemNo);
+      act.itemId = (Long) info.get("id");
+      act.itemUnitId = (Long) info.get("unitId");
+      act.itemPositionId = (Long) info.get("positionId");
+      act.itemPrice = (BigDecimal) info.get("price");
+      act.itemAmount = act.itemPrice.multiply(new BigDecimal(act.itemQty));
       act.receiveDeptId = this.getDeptIdByNo(act.receiveDeptNo);
       act.approvePersonId = this.getPersonIdByNo(act.approvePersonNo);
       act.billmakerId = this.getPersonIdByNo(act.billmakerNo);
@@ -133,9 +144,10 @@ public class InTaskRepository {
     }
   }
   
-  private Long writeEabaxActivities(List<MmActivity> activities, long maxInReceiptNo, long maxOutReceiptNo) {
+  private Long writeEabaxActivities(List<MmActivity> activities, 
+      long maxInReceiptNo, long maxOutReceiptNo) {
     for (MmActivity act: activities) {
-      if (act.activityTypeId.intValue() == 1) { // InstrumentSet
+      if (act.dataType == 1) { // InstrumentSet
         act.activityTypeId = 10L;
         act.receiptTypeId = 11L;
         act.templateId = 1059L;
@@ -150,7 +162,7 @@ public class InTaskRepository {
       act.templateId = 10381L;
       act.useTypeId = 100;
       act.hrpStatus = 1;
-      this.writeEabaxActivity(act, maxOutReceiptNo);
+      this.writeEabaxActivity(act, maxOutReceiptNo + 1);
       maxOutReceiptNo++;
     }
     return activities.get(activities.size() - 1).id;
@@ -184,23 +196,34 @@ public class InTaskRepository {
     return eabaxJdbc.queryForObject(Sqls.selOperatorName, new Object[] { no }, Long.class);
   }
   
-  private Map<String, Long> getItemInfobyNo(String no) {
+  private Map<String, Object> getItemInfobyNo(String no) {
     return eabaxJdbc.queryForObject( Sqls.selItem, new Object[] { no }, 
 
-        new RowMapper<Map<String, Long>>() {
+        new RowMapper<Map<String, Object>>() {
           @Override
-          public Map<String, Long> mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Map<String, Long> info = new HashMap<String, Long>();
+          public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Map<String, Object> info = new HashMap<String, Object>();
             info.put("id", rs.getLong("lngitemid"));
             info.put("unitId", rs.getLong("lngstockunitid"));
             info.put("positionId", rs.getLong("lngpositionid"));
+            info.put("price", rs.getBigDecimal("dblpurchaseprice"));
             return info;
           }
         } );
   }
   
-  private Long getUnitIdByName(String name) {
-    return eabaxJdbc.queryForObject(Sqls.selUnitName, new Object[] { name }, Long.class);
+  private Map<String, Long> getUnitByName(String name) {
+    return eabaxJdbc.queryForObject(Sqls.selUnit, new Object[] { name }, 
+        new RowMapper<Map<String, Long>>() {
+          @Override
+          public Map<String, Long> mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Map<String, Long> info = new HashMap<String, Long>();
+            info.put("unitId", rs.getLong("lngunitid"));
+            info.put("unitGroupId", rs.getLong("lngitemunitgroupid"));
+            return info;
+          }
+      
+        } );
   }
 
   /* Maybe not need this

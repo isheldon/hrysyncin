@@ -29,9 +29,11 @@ public class MmActivityRm implements RowMapper<MmActivity> {
     act.dataType = rs.getInt("data_type");
     act.itemNo = rs.getString("item_no");
     act.itemUnit = rs.getString("item_unit");
-    act.itemPrice = rs.getBigDecimal("item_price");
-    act.itemQty = rs.getInt("item_qty");
-    act.itemAmount = rs.getBigDecimal("item_amount");
+    act.itemQty = rs.getInt("item_qyt");
+    if (act.itemQty == 0) { act.itemQty = 1; } 
+    // the following 2 fields are null, will get and calculate from eabax item table
+    //act.itemPrice = rs.getBigDecimal("item_price");
+    //act.itemAmount = rs.getBigDecimal("item_amount");
     act.produceDate = rs.getDate("produce_date");
     act.dueDate = rs.getDate("due_date");
     act.receiveDeptNo = rs.getString("receive_dept_no");

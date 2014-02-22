@@ -20,8 +20,8 @@ public class ScheduledTasks {
     LOG.debug("Start sync from Inte to Eabax DB...");
     LOG.debug("..........................................");
     MmData data = new MmData();
-    //taskRepository.constructMmData(data);
-    //taskRepository.writeToEabaxDb(data);
+    taskRepository.constructMmData(data);
+    taskRepository.writeToEabaxDb(data);
     LOG.debug("..........................................");
     LOG.debug("End sync from Inte to Eabax DB...");
   }
