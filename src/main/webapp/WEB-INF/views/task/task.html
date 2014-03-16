@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Task Settings</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="../../../resources/css/bootstrap.min.css" rel="stylesheet" media="screen" th:href="@{/resources/css/bootstrap.min.css}"/>
+    <link href="../../../resources/css/core.css" rel="stylesheet" media="screen" th:href="@{/resources/css/core.css}" />
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="../../../resources/js/bootstrap.min.js" th:src="@{/resources/js/bootstrap.min.js}"></script>
+</head>
+
+<body>
+<form class="form-narrow form-horizontal" method="post" th:action="@{/taskRate}">
+  <th:block th:if="${taskEnabled == true}">
+    <span>Current status: Enabled</span>
+    <a href="swithTask" th:href="@{/switchTask}">Disable</a>
+  </th:block>
+  <th:block th:if="${taskEnabled == false}">
+    <span>Current status: Disabled</span>
+    <a href="swithTask" th:href="@{/switchTask}">Enable</a>
+  </th:block>
+  
+  <input type="text" size="3" class="form-control" id="taskRate" name="taskRate" th:value="${taskRate}"/>
+  <button type="submit" class="btn btn-default">Set Rate</button>
+</form>
+</body>
+
+</html>
