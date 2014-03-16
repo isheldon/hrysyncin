@@ -69,12 +69,15 @@ class Sqls {
   public static String selInstrmSets = "select * from InstrumentSet where update_time > ?";
   
   public static String insInstrmSet = "insert into item (lngitemid, stritemcode, stritemname, "
-      + "lngpurchaseunitid, lngsaleunitid, lngstockunitid, lngcalcunitid, dblsaleprice, dblsaleprice1, "
+      + "lngpurchaseunitid, lngsaleunitid, lngstockunitid, lngcalcunitid, "
+      + "dblsaleprice, dblsaleprice1, dblpurchaseprice, dblpurchaseprice1, "
       + "lngitemtypeid, lngitemnatureid, "
       + "strpackunit, bytstatus, lngorganizationid, lngitemunitgroupid, dblpackfactor) "
-      + "values (item_seq.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+      + "values (item_seq.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
   
-  public static String selMmActivities = "select * from MmActivity where update_time > ?";
+  public static String updInstrmSet = "update item set bytstatus = ? where stritemcode = ?";
+  
+  public static String selMmActivities = "select * from MmActivity where update_time > ? order by id";
   
   public static String insInOutActivity =
       "insert into itemactivity (lngactivityid, lngactivitytypeid, lngreceipttypeid, lngtemplateid, "

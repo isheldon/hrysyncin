@@ -56,7 +56,7 @@ public class InTaskRepository {
     this.refineMmActivities(activities);
     data.mmActivities = activities;
     LOG.debug("There are " + activities.size() + " mmActivities to be sync.");
-    LOG.debug(activities.toString());
+    //LOG.debug(activities.toString());
   }
   
   /**
@@ -104,12 +104,17 @@ public class InTaskRepository {
   
   private Long writeEabaxInstrmSets(List<InstrmSet> sets) {
     for (InstrmSet set: sets) {
-      eabaxJdbc.update(Sqls.insInstrmSet,
-          new Object[] {set.no, set.name,
-          set.unitId, set.unitId, set.unitId, set.unitId,
-          set.price, set.price,
-          set.type, set.nature,
-          set.unit, set.status, set.orgId, set.unitGroupId, set.packFactor} );
+      // Update status first if the instrmSet exists
+      int updated = eabaxJdbc.update(Sqls.updInstrmSet, new Object[] {set.status, set.no});
+      // If not exists, insert it
+      if (updated == 0) {
+        eabaxJdbc.update(Sqls.insInstrmSet,
+            new Object[] {set.no, set.name,
+            set.unitId, set.unitId, set.unitId, set.unitId,
+            set.price, set.price, set.price, set.price,
+            set.type, set.nature,
+            set.unit, set.status, set.orgId, set.unitGroupId, set.packFactor} );
+      }
     }
     return sets.get(sets.size() - 1).id;
   }
@@ -129,7 +134,6 @@ public class InTaskRepository {
   
   private void refineMmActivities(List<MmActivity> activities) {
     for (MmActivity act: activities) {
-      act.seqValue = this.getNextSeqValue("itemactivity_seq");
       Map<String, Object> info = this.getItemInfobyNo(act.itemNo);
       act.itemId = (Long) info.get("id");
       act.itemUnitId = (Long) info.get("unitId");
@@ -150,7 +154,7 @@ public class InTaskRepository {
       if (act.dataType == 1) { // InstrumentSet
         act.activityTypeId = 10L;
         act.receiptTypeId = 11L;
-        act.templateId = 1059L;
+        act.templateId = 10059L;
         act.useTypeId = 120;
         act.hrpStatus = 0;
         this.writeEabaxActivity(act, maxInReceiptNo + 1);
@@ -169,6 +173,7 @@ public class InTaskRepository {
   }
   
   private void writeEabaxActivity(MmActivity act, long receiptNo) {
+    act.seqValue = this.getNextSeqValue("itemactivity_seq");
     eabaxJdbc.update(Sqls.insInOutActivity, new Object[] {
         act.seqValue, act.activityTypeId, act.receiptTypeId, act.templateId,
         act.receiveDeptId, act.billYear, act.billMonth, "GYS", receiptNo,
@@ -187,7 +192,8 @@ public class InTaskRepository {
       eabaxJdbc.update(Sqls.insOutActivityDetail, new Object[] {
           act.seqValue, 1, act.itemId,
           act.itemUnitId, act.itemPositionId, act.itemQty, 302,
-          Utils.dateString(act.produceDate), Utils.dateString(act.dueDate), act.itemPrice, act.itemAmount
+          Utils.dateString(act.produceDate), Utils.dateString(act.dueDate), 
+          act.itemPrice, act.itemAmount
       });
     }
   }

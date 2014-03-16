@@ -15,6 +15,9 @@ public class InstrmSetRm implements RowMapper<InstrmSet>{
     set.name = rs.getString("name");
     set.unit = rs.getString("unit");
     set.price = rs.getBigDecimal("price");
+    if (rs.getInt("is_valid") == 0) {
+      set.status = 0;
+    }
     return set;
   }
 
