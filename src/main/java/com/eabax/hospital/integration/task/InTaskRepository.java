@@ -83,12 +83,21 @@ public class InTaskRepository {
       hasNew = true;
       LOG.debug("MmActivities cynced.");
     }
+    
+    Long lastEabaxApplyId = this.writeUnappliedEabaxApplys(data.lastLog);
+    if (lastEabaxApplyId == null) { //no unapplied
+      lastEabaxApplyId = data.lastLog.eabaxApplyId;
+    } else {
+      hasNew = true;
+      LOG.debug("Unapplied Eabax applys cynced.");
+    }
 
     if (hasNew) {
       InLog newLog = new InLog();
       newLog.processTime = data.currentSyncTime;
       newLog.instrmSetId = lastInstrmSetId;
       newLog.mmActivityId = lastMmActivityId;
+      newLog.eabaxApplyId = lastEabaxApplyId;
       this.writeInLog(newLog);
       LOG.debug("New in log created: " + newLog);
     }
@@ -254,6 +263,24 @@ public class InTaskRepository {
   
   private void writeInLog(InLog log) {
     inteJdbc.update(Sqls.insInLog,
-        new Object[] { log.processTime, log.instrmSetId, log.mmActivityId } );
+        new Object[] { log.processTime, log.instrmSetId, log.mmActivityId, log.eabaxApplyId } );
+  }
+  
+  private Long writeUnappliedEabaxApplys(InLog log) {
+    List<Long> appIds = inteJdbc.queryForList(Sqls.selUnappliedJspActivities, 
+        new Object[] { log.processTime }, Long.class);
+    if (appIds == null || appIds.isEmpty()) return null;
+    
+    for (Long appId: appIds) {
+      Long newAppId = this.getNextSeqValue("drawapply_seq");
+      String sqlInsApply = Sqls.insUnappliedApply.replaceAll("#id#", newAppId.toString());
+      sqlInsApply = sqlInsApply.replaceAll("#fromid#", appId.toString());
+      eabaxJdbc.update(sqlInsApply);
+      
+      String sqlInsApplyDetail = Sqls.insUnappliedApplyDetail.replaceAll("#id#", newAppId.toString());
+      sqlInsApplyDetail = sqlInsApplyDetail.replaceAll("#fromid#", appId.toString());
+      eabaxJdbc.update(sqlInsApplyDetail);
+    }
+    return appIds.get(appIds.size() - 1);
   }
 }

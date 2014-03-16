@@ -5,8 +5,8 @@ class Sqls {
   static String selLastInLog = "select top 1 * from EabaxInLog order by id desc";
 
   static String insInLog = "insert into EabaxInLog "
-      + "(process_time, instrm_set_id, mm_activity_id) "
-      + "values (?, ?, ?)";
+      + "(process_time, instrm_set_id, mm_activity_id, eabax_apply_id) "
+      + "values (?, ?, ?, ?)";
 
   static String insDisposibleItem = "insert into DisposableItem "
       + "(number, name, unit, specification, model, supplier_name, supplier_no, "
@@ -25,6 +25,9 @@ class Sqls {
   public static String updInstrmSet = "update item set bytstatus = ? where stritemcode = ?";
   
   public static String selMmActivities = "select * from MmActivity where update_time > ? order by id";
+  
+  public static String selUnappliedJspActivities = 
+      "select distinct(apply_id) from JspActivity where is_apply = -1 and update_time > ?";
   
   public static String insInOutActivity =
       "insert into itemactivity (lngactivityid, lngactivitytypeid, lngreceipttypeid, lngtemplateid, "
@@ -59,4 +62,47 @@ class Sqls {
   public static String selItemTypeCode = 
       "select it.stritemtypecode from item i, itemtype it "
       + "where i.lngitemtypeid = it.lngitemtypeid and i.stritemcode = ?";
+  
+  public static String insUnappliedApply =
+      "insert into drawapply " +
+      "(LNGDRAWAPPLYID, LNGRECEIPTTYPEID, LNGACTIVITYTYPEID, INTYEAR, BYTPERIOD, " +
+      "STRRECEIPTNO, LNGRECEIPTNO, LNGTEMPLATEID, STRDATE, STRAPPROVEDATE, INTATTACH, " +
+      "LNGCUSTOMERID, LNGDEPARTMENTID, LNGEMPLOYEEID, LNGCLASSID1, LNGCLASSID2, " +
+      "LNGCUSTOMERADDRESSID, LNGORGANIZATIONADDRESSID, LNGCHECKERID, BYTSTATUS, " +
+      "BLNAPPROVE, LNGOPERATORID, LNGAPPROVEID, STRERRORMSG, STRNOTE, BLNISPRINT, " +
+      "BLNISVOID, BLNISPRINTED, STRPREPARE1, STRPREPARE2, LNGORGANIZATIONID, " +
+      "STRFLEXIBLEID, INTSOURCE, LNGOUTTYPEID, STRBILLSOURCE) " +
+      "select #id#, LNGRECEIPTTYPEID, LNGACTIVITYTYPEID, INTYEAR, BYTPERIOD, 'GYSHT', " +
+      "LNGRECEIPTNO, LNGTEMPLATEID, STRDATE, STRAPPROVEDATE, INTATTACH, " +
+      "LNGCUSTOMERID, LNGDEPARTMENTID, LNGEMPLOYEEID, LNGCLASSID1, LNGCLASSID2, " +
+      "LNGCUSTOMERADDRESSID, LNGORGANIZATIONADDRESSID, LNGCHECKERID, BYTSTATUS, " +
+      "BLNAPPROVE, LNGOPERATORID, LNGAPPROVEID, STRERRORMSG, STRNOTE, BLNISPRINT, " +
+      "BLNISVOID, BLNISPRINTED, STRPREPARE1, STRPREPARE2, LNGORGANIZATIONID, " +
+      "STRFLEXIBLEID, INTSOURCE, LNGOUTTYPEID, STRBILLSOURCE " +
+      "from drawapply where LNGDRAWAPPLYID = #fromid#";
+  
+  public static String insUnappliedApplyDetail =
+      "insert into drawapplydetail (LNGDRAWAPPLYDETAILID, LNGDRAWAPPLYID, LNGROWID, " +
+      "LNGITEMID, LNGUNITID, LNGPOSITIONID, DBLAPPLYQUANTITY, DBLAPPROVEQUANTITY, " +
+      "DBLSENDQUANTITY, DBLEXECUTEQUANTITY, LNGUNITIDAUX, DBLFACTOR, " +
+      "DBLAPPLYQUANTITYAUX, DBLAPPROVEQUANTITYAUX, DBLSENDQUANTITYAUX, " +
+      "DBLEXECUTEQUANTITYAUX, LNGCUSTOMID0, LNGCUSTOMID1, LNGCUSTOMID2, " +
+      "LNGCUSTOMID3, LNGCUSTOMID4, LNGCUSTOMID5, LNGCUSTOMTEXTID1, " +
+      "LNGCUSTOMTEXTID2, LNGCUSTOMTEXTID3, LNGCUSTOMTEXTID4, LNGCUSTOMTEXTID5, " +
+      "STRRESERVE1, STRRESERVE2, STRRESERVE3, STRRESERVE4, STRRESERVE5, STRRESERVE6, " +
+      "STRRESERVE7, DBLRESERVE1, DBLRESERVE2, DATERESERVE, STRSUPPLYDATE, BLNCLOSE, " +
+      "LNGASKPURCHASEDETAILID, LNGPURCHASEPLANDETAILID, STRPLANNO, STRPRODUCENUM, " +
+      "STRPRODUCEDATE, STRVALIDDATE, INTVALIDDAY, STRPRODUCECUSTOMVALUE) " +
+      "select drawapplydetail_seq.nextval, #id#, LNGROWID, LNGITEMID, LNGUNITID, " +
+      "LNGPOSITIONID, 0-DBLAPPLYQUANTITY, 0-DBLAPPROVEQUANTITY, 0-DBLSENDQUANTITY, " +
+      "0-DBLEXECUTEQUANTITY, LNGUNITIDAUX, DBLFACTOR, 0-DBLAPPLYQUANTITYAUX, " +
+      "0-DBLAPPROVEQUANTITYAUX, 0-DBLSENDQUANTITYAUX, 0-DBLEXECUTEQUANTITYAUX, " +
+      "LNGCUSTOMID0, LNGCUSTOMID1, LNGCUSTOMID2, LNGCUSTOMID3, LNGCUSTOMID4, " +
+      "LNGCUSTOMID5, LNGCUSTOMTEXTID1, LNGCUSTOMTEXTID2, LNGCUSTOMTEXTID3, " +
+      "LNGCUSTOMTEXTID4, LNGCUSTOMTEXTID5, STRRESERVE1, STRRESERVE2, STRRESERVE3, " +
+      "STRRESERVE4, STRRESERVE5, STRRESERVE6, STRRESERVE7, DBLRESERVE1, DBLRESERVE2, " +
+      "DATERESERVE, STRSUPPLYDATE, BLNCLOSE, LNGASKPURCHASEDETAILID, " +
+      "LNGPURCHASEPLANDETAILID, STRPLANNO, STRPRODUCENUM, STRPRODUCEDATE, " +
+      "STRVALIDDATE, INTVALIDDAY, STRPRODUCECUSTOMVALUE " +
+      "from drawapplydetail where LNGDRAWAPPLYID = #fromid#";
 }
