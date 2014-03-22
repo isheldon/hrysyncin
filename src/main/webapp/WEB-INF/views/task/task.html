@@ -13,16 +13,16 @@
 <body>
 <form class="form-narrow form-horizontal" method="post" th:action="@{/taskRate}">
   <th:block th:if="${taskEnabled == true}">
-    <span>Current status: Enabled</span>
-    <a href="swithTask" th:href="@{/switchTask}">Disable</a>
+    <span>当前任务状态: 正在运行</span> &nbsp;&nbsp;
+    <a href="swithTask" th:href="@{/switchTask}">停止</a>
   </th:block>
   <th:block th:if="${taskEnabled == false}">
-    <span>Current status: Disabled</span>
-    <a href="swithTask" th:href="@{/switchTask}">Enable</a>
+    <span>当前任务状态: 停止</span> &nbsp;&nbsp;
+    <a href="swithTask" th:href="@{/switchTask}">启动</a>
   </th:block>
   
-  <input type="text" size="3" class="form-control" id="taskRate" name="taskRate" th:value="${taskRate}"/>
-  <button type="submit" class="btn btn-default">Set Rate</button>
+    任务间隔： <input type="text" size="3" class="input-mini" id="taskRate" name="taskRate" th:value="${taskRate}"/> 分钟
+  <button type="submit" class="btn btn-default">设置</button>
 </form>
 </body>
 
