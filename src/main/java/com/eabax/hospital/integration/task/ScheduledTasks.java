@@ -19,7 +19,7 @@ public class ScheduledTasks {
   @Autowired
   private InTaskRepository taskRepository;
 
-  @Scheduled(fixedRate = 180000)
+  @Scheduled(fixedRate = 60000)
   public void reportCurrentTime() {
     if (enabled && count % rate == 0) {
       LOG.debug("Start sync from Inte to Eabax DB...");

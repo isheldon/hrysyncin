@@ -272,13 +272,7 @@ public class InTaskRepository {
     if (appIds == null || appIds.isEmpty()) return null;
     
     for (Long appId: appIds) {
-      Long newAppId = this.getNextSeqValue("drawapply_seq");
-      String sqlInsApply = Sqls.insUnappliedApply.replaceAll("#id#", newAppId.toString());
-      sqlInsApply = sqlInsApply.replaceAll("#fromid#", appId.toString());
-      eabaxJdbc.update(sqlInsApply);
-      
-      String sqlInsApplyDetail = Sqls.insUnappliedApplyDetail.replaceAll("#id#", newAppId.toString());
-      sqlInsApplyDetail = sqlInsApplyDetail.replaceAll("#fromid#", appId.toString());
+      String sqlInsApplyDetail = Sqls.insUnappliedApplyDetail.replaceAll("#fromid#", appId.toString());
       eabaxJdbc.update(sqlInsApplyDetail);
     }
     return appIds.get(appIds.size() - 1);
