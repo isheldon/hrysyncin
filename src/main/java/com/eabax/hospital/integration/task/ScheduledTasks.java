@@ -24,7 +24,6 @@ public class ScheduledTasks {
     if (enabled && count % rate == 0) {
       LOG.debug("..........Start sync from Inte to Eabax DB.............");
       MmData data = new MmData();
-      taskRepository.constructMmData(data);
       taskRepository.writeToEabaxDb(data);
       LOG.debug("..........End sync from Inte to Eabax DB.............");
     }

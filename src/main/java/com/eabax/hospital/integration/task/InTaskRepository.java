@@ -34,32 +34,6 @@ public class InTaskRepository {
   JdbcTemplate inteJdbc;
   
   /**
-   * Retrieve data to be sync from Inte DB
-   * @param data Container of Inte data
-   */
-  public void constructMmData(MmData data) {
-    data.currentSyncTime = new Timestamp(System.currentTimeMillis());
-    InLog log = getLastInLog();
-    data.lastLog = log;
-    LOG.debug("Last in log: " + log);
-    
-    List<InstrmSet> sets = this.getInteInstrmSets(log);
-    this.refineInstrmSets(sets);
-    data.instrmSets = sets;
-    LOG.debug("There are " + sets.size() + " instrument sets to be sync.");
-    //LOG.debug(sets.toString());
-    
-    data.maxInReceiptNo = this.getMaxReceiptNo(11L, "GYS");
-    data.maxOutReceiptNo = this.getMaxReceiptNo(21L, "GYS");
-    
-    List<MmActivity> activities = this.getInteMmActivities(log);
-    this.refineMmActivities(activities);
-    data.mmActivities = activities;
-    LOG.debug("There are " + activities.size() + " mmActivities to be sync.");
-    //LOG.debug(activities.toString());
-  }
-  
-  /**
    * Write MM data to EabaxDb
    * @param data MM data container
    * @param log Last inLog
@@ -67,8 +41,22 @@ public class InTaskRepository {
   @Transactional(value="eabaxTxManager",
       rollbackFor=RuntimeException.class, propagation=Propagation.REQUIRED)
   public void writeToEabaxDb(MmData data) {
+    // get last log
+    data.currentSyncTime = new Timestamp(System.currentTimeMillis());
+    InLog log = getLastInLog();
+    data.lastLog = log;
+    LOG.debug("Last in log: " + log);
+    
+    // construct instrument sets
+    List<InstrmSet> sets = this.getInteInstrmSets(log);
+    this.refineInstrmSets(sets);
+    data.instrmSets = sets;
+    LOG.debug("There are " + sets.size() + " instrument sets to be sync.");
+    
+    // begin to sync
     boolean hasNew = false;
 
+    // sync instrument sets
     Long lastInstrmSetId = data.lastLog.instrmSetId;
     if (data.instrmSets.size() > 0) {
       lastInstrmSetId = this.writeEabaxInstrmSets(data.instrmSets);
@@ -76,6 +64,15 @@ public class InTaskRepository {
       LOG.debug("Instrument sets cynced.");
     }
     
+    // construct mmActivities
+    data.maxInReceiptNo = this.getMaxReceiptNo(11L, "GYS");
+    data.maxOutReceiptNo = this.getMaxReceiptNo(21L, "GYS");
+    List<MmActivity> activities = this.getInteMmActivities(log);
+    this.refineMmActivities(activities);
+    data.mmActivities = activities;
+    LOG.debug("There are " + activities.size() + " mmActivities to be sync.");
+    
+    // sync mmActivities
     Long lastMmActivityId = data.lastLog.mmActivityId;
     if (data.mmActivities.size() > 0) {
       lastMmActivityId = this.writeEabaxActivities(
@@ -84,6 +81,7 @@ public class InTaskRepository {
       LOG.debug("MmActivities cynced.");
     }
     
+    // sync unapplied eabax applys
     Long lastEabaxApplyId = this.writeUnappliedEabaxApplys(data.lastLog);
     if (lastEabaxApplyId == null) { //no unapplied
       lastEabaxApplyId = data.lastLog.eabaxApplyId;
