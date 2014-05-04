@@ -23,8 +23,7 @@ public class ScheduledTasks {
   public void reportCurrentTime() {
     if (enabled && count % rate == 0) {
       LOG.debug("..........Start sync from Inte to Eabax DB.............");
-      MmData data = new MmData();
-      taskRepository.writeToEabaxDb(data);
+      taskRepository.writeToEabaxDb();
       LOG.debug("..........End sync from Inte to Eabax DB.............");
     }
     count++;
