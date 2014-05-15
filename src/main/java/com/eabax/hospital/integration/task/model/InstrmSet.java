@@ -12,7 +12,7 @@ public class InstrmSet {
   public Long unitId;
   public Long unitGroupId;
   
-  public Long type = 138L;
+  public Long type = 140L; //其它卫生材料
   public Long nature = 107L;
   public int status = 2;
   public int packFactor = 1;
