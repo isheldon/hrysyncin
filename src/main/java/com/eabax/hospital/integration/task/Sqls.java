@@ -27,7 +27,7 @@ class Sqls {
   public static String selMmActivities = "select * from MmActivity where update_time > ? order by id";
   
   public static String selUnappliedJspActivities = 
-      "select apply_id from JspActivity where is_apply = -1 and update_time > ?";
+      "select apply_detail_id from JspActivity where is_apply = -1 and update_time > ?";
   
   public static String insInOutActivity =
       "insert into itemactivity (lngactivityid, lngactivitytypeid, lngreceipttypeid, lngtemplateid, "
