@@ -7,11 +7,13 @@ public class InLog {
   public Long instrmSetId;
   public Long mmActivityId;
   public Long eabaxRevertApplyId;
+  public Long eabaxReturnApplyId;
 
   @Override
   public String toString() {
     return "InLog [processTime=" + processTime + ", instrmSetId=" + instrmSetId
-        + ", mmActivityId=" + mmActivityId + ", eabaxApplyId=" + eabaxRevertApplyId
+        + ", mmActivityId=" + mmActivityId + ", eabaxRevertApplyId=" + eabaxRevertApplyId
+        + ", eabaxReturnApplyId=" + eabaxReturnApplyId
         + "]";
   }
 }

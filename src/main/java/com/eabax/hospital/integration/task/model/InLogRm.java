@@ -14,6 +14,7 @@ public class InLogRm implements RowMapper<InLog> {
     log.instrmSetId = rs.getLong("instrm_set_id");
     log.mmActivityId = rs.getLong("mm_activity_id");
     log.eabaxRevertApplyId = rs.getLong("eabax_revert_apply_id");
+    log.eabaxReturnApplyId = rs.getLong("eabax_return_apply_id");
     return log;
   }
 
