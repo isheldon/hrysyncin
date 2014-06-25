@@ -79,9 +79,9 @@ public class InTaskRepository {
     }
     
     //整单回退未出库一次性物品, 用于修改输错的单据
-    Long lastEabaxApplyId = this.revertUnoutDisposibleItems(lastLog);
-    if (lastEabaxApplyId == null) { //没有需要回退的单据
-      lastEabaxApplyId = lastLog.eabaxApplyId;
+    Long lastEabaxRevertApplyId = this.revertUnoutDisposibleItems(lastLog);
+    if (lastEabaxRevertApplyId == null) { //没有需要回退的单据
+      lastEabaxRevertApplyId = lastLog.eabaxRevertApplyId;
     } else {
       hasNew = true;
       LOG.debug("已整单回退未出库一次性物品");
@@ -103,7 +103,7 @@ public class InTaskRepository {
       newLog.processTime = currentSyncTime;
       newLog.instrmSetId = lastInstrmSetId;
       newLog.mmActivityId = lastMmActivityId;
-      newLog.eabaxApplyId = lastEabaxApplyId;
+      newLog.eabaxRevertApplyId = lastEabaxRevertApplyId;
       this.writeInLog(newLog);
       LOG.debug("New in log created: " + newLog);
     }
@@ -269,7 +269,7 @@ public class InTaskRepository {
   
   private void writeInLog(InLog log) {
     inteJdbc.update(Sqls.insInLog,
-        new Object[] { log.processTime, log.instrmSetId, log.mmActivityId, log.eabaxApplyId } );
+        new Object[] { log.processTime, log.instrmSetId, log.mmActivityId, log.eabaxRevertApplyId } );
   }
   
   //整单回退未出库一次性物品

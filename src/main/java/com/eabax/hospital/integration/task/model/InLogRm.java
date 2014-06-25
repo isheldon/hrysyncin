@@ -13,7 +13,7 @@ public class InLogRm implements RowMapper<InLog> {
     log.processTime = rs.getTimestamp("process_time");
     log.instrmSetId = rs.getLong("instrm_set_id");
     log.mmActivityId = rs.getLong("mm_activity_id");
-    log.eabaxApplyId = rs.getLong("eabax_apply_id");
+    log.eabaxRevertApplyId = rs.getLong("eabax_revert_apply_id");
     return log;
   }
 

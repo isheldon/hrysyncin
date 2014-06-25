@@ -5,7 +5,7 @@ class Sqls {
   static String selLastInLog = "select top 1 * from EabaxInLog order by id desc";
 
   static String insInLog = "insert into EabaxInLog "
-      + "(process_time, instrm_set_id, mm_activity_id, eabax_apply_id) "
+      + "(process_time, instrm_set_id, mm_activity_id, eabax_revert_apply_id) "
       + "values (?, ?, ?, ?)";
 
   static String insDisposibleItem = "insert into DisposableItem "

@@ -6,12 +6,12 @@ public class InLog {
   public Timestamp processTime;
   public Long instrmSetId;
   public Long mmActivityId;
-  public Long eabaxApplyId;
+  public Long eabaxRevertApplyId;
 
   @Override
   public String toString() {
     return "InLog [processTime=" + processTime + ", instrmSetId=" + instrmSetId
-        + ", mmActivityId=" + mmActivityId + ", eabaxApplyId=" + eabaxApplyId
+        + ", mmActivityId=" + mmActivityId + ", eabaxApplyId=" + eabaxRevertApplyId
         + "]";
   }
 }
