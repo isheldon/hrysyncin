@@ -78,7 +78,16 @@ public class InTaskRepository {
       LOG.debug("MmActivities cynced.");
     }
     
-    // sync unapplied eabax applys
+    //整单回退未出库一次性物品, 用于修改输错的单据
+    Long lastEabaxApplyId = this.revertUnoutDisposibleItems(lastLog);
+    if (lastEabaxApplyId == null) { //没有需要回退的单据
+      lastEabaxApplyId = lastLog.eabaxApplyId;
+    } else {
+      hasNew = true;
+      LOG.debug("已整单回退未出库一次性物品");
+    }
+    
+    /*
     Long lastEabaxApplyId = this.writeUnappliedEabaxApplys(lastLog);
     if (lastEabaxApplyId == null) { //no unapplied
       lastEabaxApplyId = lastLog.eabaxApplyId;
@@ -86,6 +95,8 @@ public class InTaskRepository {
       hasNew = true;
       LOG.debug("Unapplied Eabax applys cynced.");
     }
+    */
+    
 
     if (hasNew) {
       InLog newLog = new InLog();
@@ -259,6 +270,25 @@ public class InTaskRepository {
   private void writeInLog(InLog log) {
     inteJdbc.update(Sqls.insInLog,
         new Object[] { log.processTime, log.instrmSetId, log.mmActivityId, log.eabaxApplyId } );
+  }
+  
+  //整单回退未出库一次性物品
+  private Long revertUnoutDisposibleItems(InLog log) {
+    //查询需要回退的单据号
+    List<Long> applyIds = inteJdbc.queryForList(Sqls.selRevertApplyIds, 
+        new Object[] { log.processTime }, Long.class);
+    if (applyIds == null || applyIds.isEmpty()) return null;
+    //把单据号存入log, 供回退后重新提交时处理
+    for (Long applyId: applyIds) {
+      eabaxJdbc.update(Sqls.insRevertLog, new Object[] { applyId });
+    }
+    //调用单据回退的webservice
+    try {
+      //call webservice
+    } catch (Exception e) {
+      throw new RuntimeException("调用单据回退WebService失败: " + e.getMessage());
+    }
+    return applyIds.get(applyIds.size() - 1);
   }
   
   private Long writeUnappliedEabaxApplys(InLog log) {
