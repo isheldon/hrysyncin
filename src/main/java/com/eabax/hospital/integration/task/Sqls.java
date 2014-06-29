@@ -5,8 +5,8 @@ class Sqls {
   static String selLastInLog = "select top 1 * from EabaxInLog order by id desc";
 
   static String insInLog = "insert into EabaxInLog "
-      + "(process_time, instrm_set_id, mm_activity_id, eabax_revert_apply_id) "
-      + "values (?, ?, ?, ?)";
+      + "(process_time, instrm_set_id, mm_activity_id, eabax_revert_apply_id, eabax_return_apply_id) "
+      + "values (?, ?, ?, ?, ?)";
 
   static String insDisposibleItem = "insert into DisposableItem "
       + "(number, name, unit, specification, model, supplier_name, supplier_no, "
@@ -30,8 +30,8 @@ class Sqls {
       "select drawapply_id from JspActivity where is_apply = -1 and update_time > ? order by drawapply_id";
   public static String insRevertLog = "insert into EabaxRevertLog (drawapply_id, is_handled) values (?, 0)";
   
-  public static String selUnappliedJspActivities = 
-      "select apply_detail_id from JspActivity where is_apply = -1 and update_time > ?";
+  public static String selReturnJspActivities = 
+      "select * from JspActivity where is_apply = 1 and item_type = 2 and update_time > ? order by drawapply_id";
   
   public static String insInOutActivity =
       "insert into itemactivity (lngactivityid, lngactivitytypeid, lngreceipttypeid, lngtemplateid, "

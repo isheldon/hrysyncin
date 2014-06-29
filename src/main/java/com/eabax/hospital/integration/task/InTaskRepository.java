@@ -1,6 +1,7 @@
 package com.eabax.hospital.integration.task;
 
 import java.math.BigDecimal;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -8,15 +9,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codehaus.xfire.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.eabax.hospital.integration.task.model.ApplyActivity;
 import com.eabax.hospital.integration.task.model.InLog;
 import com.eabax.hospital.integration.task.model.InstrmSet;
 import com.eabax.hospital.integration.task.model.MmActivity;
@@ -32,6 +36,9 @@ public class InTaskRepository {
 
   @Autowired
   JdbcTemplate inteJdbc;
+  
+  @Value("${rollbackws.url}")
+  private String wsUrl;
   
   /**
    * Write MM data to EabaxDb
@@ -79,7 +86,7 @@ public class InTaskRepository {
     }
     
     //整单回退未出库一次性物品, 用于修改输错的单据
-    Long lastEabaxRevertApplyId = this.revertUnoutDisposibleItems(lastLog);
+    Long lastEabaxRevertApplyId = this.revertEabaxApplys(lastLog);
     if (lastEabaxRevertApplyId == null) { //没有需要回退的单据
       lastEabaxRevertApplyId = lastLog.eabaxRevertApplyId;
     } else {
@@ -87,15 +94,14 @@ public class InTaskRepository {
       LOG.debug("已整单回退未出库一次性物品");
     }
     
-    /*
-    Long lastEabaxApplyId = this.writeUnappliedEabaxApplys(lastLog);
-    if (lastEabaxApplyId == null) { //no unapplied
-      lastEabaxApplyId = lastLog.eabaxApplyId;
+    //一次性物品已出库申请有误,回退
+    Long lastEabaxReturnApplyId = this.returnEabaxApplys(lastLog);
+    if (lastEabaxReturnApplyId == null) { //没有需要回退的单据
+      lastEabaxReturnApplyId = lastLog.eabaxReturnApplyId;
     } else {
       hasNew = true;
-      LOG.debug("Unapplied Eabax applys cynced.");
+      LOG.debug("已回退一次性物品已出库申请");
     }
-    */
     
 
     if (hasNew) {
@@ -104,6 +110,7 @@ public class InTaskRepository {
       newLog.instrmSetId = lastInstrmSetId;
       newLog.mmActivityId = lastMmActivityId;
       newLog.eabaxRevertApplyId = lastEabaxRevertApplyId;
+      newLog.eabaxReturnApplyId = lastEabaxReturnApplyId; 
       this.writeInLog(newLog);
       LOG.debug("New in log created: " + newLog);
     }
@@ -214,6 +221,7 @@ public class InTaskRepository {
   }
   
   private Long getPersonIdByNo(String no) {
+    if (no == null || no.length() == 0) return null;
     return eabaxJdbc.queryForObject(Sqls.selOperatorName, new Object[] { no }, Long.class);
   }
   
@@ -269,37 +277,87 @@ public class InTaskRepository {
   
   private void writeInLog(InLog log) {
     inteJdbc.update(Sqls.insInLog,
-        new Object[] { log.processTime, log.instrmSetId, log.mmActivityId, log.eabaxRevertApplyId } );
+        new Object[] { log.processTime, log.instrmSetId, log.mmActivityId, 
+            log.eabaxRevertApplyId, log.eabaxReturnApplyId } );
   }
   
   //整单回退未出库一次性物品
-  private Long revertUnoutDisposibleItems(InLog log) {
+  private Long revertEabaxApplys(InLog log) {
     //查询需要回退的单据号
     List<Long> applyIds = inteJdbc.queryForList(Sqls.selRevertApplyIds, 
         new Object[] { log.processTime }, Long.class);
     if (applyIds == null || applyIds.isEmpty()) return null;
+    
+    //单据回退的webservice URL
+    //先从配置取值,没有的话用localhost
+    if (wsUrl == null) {
+      wsUrl = "http://localhost:8080/core/services/BillRollBack?wsdl";
+    }
+    LOG.debug("单据回退的webservice URL: " + wsUrl);
+    
     //把单据号存入log, 供回退后重新提交时处理
     for (Long applyId: applyIds) {
       eabaxJdbc.update(Sqls.insRevertLog, new Object[] { applyId });
-    }
-    //调用单据回退的webservice
-    try {
-      //call webservice
-    } catch (Exception e) {
-      throw new RuntimeException("调用单据回退WebService失败: " + e.getMessage());
+
+      //调用单据回退的webservice
+      try {
+        //call webservice
+        String xml="<?xml version=\"1.0\" encoding = \"UTF-8\"?><packet><billId>" + applyId 
+            + "</billId><type>lyReq</type><rejectIdea>RevertLy</rejectIdea></packet>";
+        Client client = new Client(new URL(wsUrl));
+        final Object[] results = client.invoke("doRollBackToMake", new Object[]{xml});
+        String ret = (String) results[0];
+        LOG.debug("单据回退WebService调用结果:" + ret);
+      } catch (Exception e) {
+        throw new RuntimeException("调用单据回退WebService失败: " + e.getMessage());
+      }
     }
     return applyIds.get(applyIds.size() - 1);
   }
   
-  private Long writeUnappliedEabaxApplys(InLog log) {
-    List<Long> appIds = inteJdbc.queryForList(Sqls.selUnappliedJspActivities, 
-        new Object[] { log.processTime }, Long.class);
-    if (appIds == null || appIds.isEmpty()) return null;
+  //一次性物品已出库申请有误,回退
+  //生成负数的领用出库单
+  private Long returnEabaxApplys(InLog log) {
+    List<ApplyActivity> acts = inteJdbc.query(Sqls.selReturnJspActivities, 
+        new Object[] { log.processTime }, RowMappers.applyActivity);
+    if (acts == null || acts.isEmpty()) return null;
     
-    for (Long appId: appIds) {
-      String sqlInsApplyDetail = Sqls.insUnappliedApplyDetail.replaceAll("#fromid#", appId.toString());
-      eabaxJdbc.update(sqlInsApplyDetail);
+    Long activityTypeId = 19L;
+    Long receiptTypeId = 21L;
+    Long templateId = 10381L;
+    Integer useTypeId = 100;
+    Integer hrpStatus = 1;
+    Long organizationId = 1L;
+    Integer status = 2;
+    Long receiptNo = getMaxReceiptNo(21L, "GYS") + 1;
+    String today = Utils.dateStringNow();
+    Long currencyid = 1L;
+    Double rate = 1.0D;
+    for (ApplyActivity act: acts) {
+      Long seq = getNextSeqValue("itemactivity_seq");
+      Long deptId = getDeptIdByNo(act.applyDeptNo);
+      Long billmakerId = getPersonIdByNo(Utils.personNo(act.applyPerson));
+      Long approvePersonId = getPersonIdByNo(Utils.personNo(act.approvePerson));
+      Map<String, Object> itemInfo = getItemInfobyNo(act.itemNo);
+      Long itemId = (Long) itemInfo.get("id");
+      Long unitId = (Long) itemInfo.get("unitId");
+      Long positionId = (Long) itemInfo.get("positionId");
+      BigDecimal price = (BigDecimal) itemInfo.get("price");
+      
+      eabaxJdbc.update(Sqls.insInOutActivity, new Object[] {
+          seq, activityTypeId, receiptTypeId, templateId, deptId,
+          Utils.getCurrentYear(), Utils.getCurrentMonth(), "GYS", receiptNo,
+          today, today, today, currencyid, rate,
+          billmakerId, approvePersonId, useTypeId, organizationId, status, hrpStatus
+      });
+      receiptNo++;
+      
+      eabaxJdbc.update(Sqls.insOutActivityDetail, new Object[] {
+          seq, 1, itemId, unitId, positionId, -act.itemQty, 302,
+          " ", " ", //produce_date, due_date
+          price, price.multiply(BigDecimal.valueOf(-act.itemQty.longValue()))
+      });
     }
-    return appIds.get(appIds.size() - 1);
+    return acts.get(acts.size() - 1).drawapplyId;
   }
 }

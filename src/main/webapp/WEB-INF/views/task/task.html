@@ -6,23 +6,24 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link href="../../../resources/css/bootstrap.min.css" rel="stylesheet" media="screen" th:href="@{/resources/css/bootstrap.min.css}"/>
     <link href="../../../resources/css/core.css" rel="stylesheet" media="screen" th:href="@{/resources/css/core.css}" />
-    <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script src="../../../resources/js/bootstrap.min.js" th:src="@{/resources/js/bootstrap.min.js}"></script>
 </head>
 
 <body>
 <form class="form-narrow form-horizontal" method="post" th:action="@{/taskRate}">
   <th:block th:if="${taskEnabled == true}">
-    <span>Е╫⌠Е┴█Д╩╩Е┼║Г┼╤Ф─│: Ф╜ёЕ°╗Х©░Х║▄</span> &nbsp;&nbsp;
-    <a href="swithTask" th:href="@{/switchTask}">Е│°Ф╜╒</a>
+    <span>хннЯ╣╠г╟в╢л╛: уЩтзткпп</span> &nbsp;&nbsp;
+    <a href="swithTask" th:href="@{/switchTask}">мёж╧</a>
   </th:block>
   <th:block th:if="${taskEnabled == false}">
-    <span>Е╫⌠Е┴█Д╩╩Е┼║Г┼╤Ф─│: Е│°Ф╜╒</span> &nbsp;&nbsp;
-    <a href="swithTask" th:href="@{/switchTask}">Е░╞Е┼╗</a>
+    <span>хннЯ╣╠г╟в╢л╛: рямёж╧</span> &nbsp;&nbsp;
+    <a href="swithTask" th:href="@{/switchTask}">©╙фТ</a>
   </th:block>
-  
-    Д╩╩Е┼║И≈╢И ■О╪  <input type="text" size="3" class="input-mini" id="taskRate" name="taskRate" th:value="${taskRate}"/> Е┬├И▓÷
-  <button type="submit" class="btn btn-default">Х╝╬Г╫╝</button>
+  <hr/>
+    хннЯткпп╪Д╦Т: <input type="text" size="3" class="input-mini" id="taskRate" name="taskRate" th:value="${taskRate}"/> ╥жжс
+  <button type="submit" class="btn btn-default">иХжц</button>
+  <hr/>
+  <p><a href="/">╥╣╩ь</a></p>
 </form>
 </body>
 

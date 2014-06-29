@@ -4,6 +4,8 @@ import java.sql.Date;
 
 public class ApplyActivity {
   public Long id;
+  public Long drawapplyId;
+  public Long applyDetailId;
   public String applyNumber;
   public Date applyDate;
   public String applyDeptNo;
@@ -19,25 +21,5 @@ public class ApplyActivity {
   public String billType;
   public Integer receiveType;
   public Integer applyType;
-  
-  public void setApproveDate(String aprDate) {
-    if (aprDate == null) {
-      this.approveDate = null;
-    } else {
-      this.approveDate = Date.valueOf(aprDate);
-    }
-  }
-
-  @Override
-  public String toString() {
-    return "ApplyActivity [id=" + id + ", applyNumber=" + applyNumber
-        + ", applyDate=" + applyDate + ", applyDeptNo=" + applyDeptNo
-        + ", applyPerson=" + applyPerson + ", approveDate=" + approveDate
-        + ", approvePerson=" + approvePerson + ", itemName=" + itemName
-        + ", itemType=" + itemType + ", itemNo=" + itemNo + ", itemUnit="
-        + itemUnit + ", itemQty=" + itemQty + ", receiverPerson="
-        + receiverPerson + ", billType=" + billType + ", receiveType="
-        + receiveType + ", applyType=" + applyType + "]";
-  }
   
 }

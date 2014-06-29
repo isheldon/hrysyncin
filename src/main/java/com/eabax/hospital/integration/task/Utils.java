@@ -24,6 +24,12 @@ public class Utils {
     return name + "/" + no;
   }
   
+  //把name/no格式的字符串中的no提取出来
+  public static String personNo(String nameNo) {
+    if (nameNo == null || nameNo.length() == 0) return null;
+    return nameNo.substring(nameNo.indexOf("/") + 1);
+  }
+  
   public static int getYear(Date date) {
     Calendar cal = Calendar.getInstance();
     cal.setTimeInMillis(date.getTime());
@@ -36,7 +42,19 @@ public class Utils {
     return cal.get(Calendar.MONTH) + 1;
   }
   
+  public static int getCurrentYear() {
+    return getYear(new Date(System.currentTimeMillis()));
+  }
+  
+  public static int getCurrentMonth() {
+    return getMonth(new Date(System.currentTimeMillis()));
+  }
+  
   public static String dateString(Date date) {
     return new SimpleDateFormat("yyyy-MM-dd").format(date);
+  }
+  
+  public static String dateStringNow() {
+    return dateString(new Date(System.currentTimeMillis()));
   }
 }
