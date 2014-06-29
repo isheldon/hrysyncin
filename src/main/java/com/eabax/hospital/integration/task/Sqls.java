@@ -27,7 +27,7 @@ class Sqls {
   public static String selMmActivities = "select * from MmActivity where update_time > ? order by id";
   
   public static String selRevertApplyIds = 
-      "select drawapply_id from JspActivity where is_apply = -1 and update_time > ? order by drawapply_id";
+      "select distinct(drawapply_id) from JspActivity where is_apply = -1 and update_time > ? order by drawapply_id";
   public static String insRevertLog = "insert into EabaxRevertLog (drawapply_id, is_handled) values (?, 0)";
   
   public static String selReturnJspActivities = 

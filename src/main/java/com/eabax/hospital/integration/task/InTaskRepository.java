@@ -302,7 +302,7 @@ public class InTaskRepository {
       //调用单据回退的webservice
       try {
         //call webservice
-        String xml="<?xml version=\"1.0\" encoding = \"UTF-8\"?><packet><billId>" + applyId 
+        String xml="<?xml version=\"1.0\" encoding=\"UTF-8\"?><packet><billId>" + applyId 
             + "</billId><type>lyReq</type><rejectIdea>RevertLy</rejectIdea></packet>";
         Client client = new Client(new URL(wsUrl));
         final Object[] results = client.invoke("doRollBackToMake", new Object[]{xml});
