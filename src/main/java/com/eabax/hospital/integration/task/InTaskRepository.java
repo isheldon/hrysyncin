@@ -281,6 +281,11 @@ public class InTaskRepository {
             log.eabaxRevertApplyId, log.eabaxReturnApplyId } );
   }
   
+  private String getHeaderId(Long applyId) {
+    return eabaxJdbc.queryForObject(Sqls.selHeaderId, 
+        new Object[] {applyId}, String.class);
+  }
+  
   //整单回退未出库一次性物品
   private Long revertEabaxApplys(InLog log) {
     //查询需要回退的单据号
@@ -297,12 +302,14 @@ public class InTaskRepository {
     
     //把单据号存入log, 供回退后重新提交时处理
     for (Long applyId: applyIds) {
+      String headerId = this.getHeaderId(applyId);
+          
       inteJdbc.update(Sqls.insRevertLog, new Object[] { applyId });
 
       //调用单据回退的webservice
       try {
         //call webservice
-        String xml="<?xml version=\"1.0\" encoding=\"UTF-8\"?><packet><billId>" + applyId 
+        String xml="<?xml version=\"1.0\" encoding=\"UTF-8\"?><packet><billId>" + headerId 
             + "</billId><type>lyReq</type><rejectIdea>RevertLy</rejectIdea></packet>";
         Client client = new Client(new URL(wsUrl));
         final Object[] results = client.invoke("doRollBackToMake", new Object[]{xml});

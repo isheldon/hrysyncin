@@ -91,4 +91,10 @@ class Sqls {
       "LNGPURCHASEPLANDETAILID, STRPLANNO, STRPRODUCENUM, STRPRODUCEDATE, " +
       "STRVALIDDATE, INTVALIDDAY, STRPRODUCECUSTOMVALUE " +
       "from drawapplydetail where LNGDRAWAPPLYDETAILID = #fromid#";
+  
+  public static String selHeaderId = "SELECT H.F_ID " +
+      "FROM DRAWAPPLY T, DB_WF_BILL_HEADER H  " +
+      "WHERE ((H.F_BILL_ID='-' AND T.LNGDRAWAPPLYID = H.F_ID)  " +
+      "   OR (H.F_BILL_TYPE='lyReq' AND TO_CHAR(T.LNGDRAWAPPLYID) = H.F_BILL_ID))  " +
+      "and  T.lngdrawapplyid = ?";
 }
