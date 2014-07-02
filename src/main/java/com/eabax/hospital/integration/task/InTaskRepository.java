@@ -297,7 +297,7 @@ public class InTaskRepository {
     
     //把单据号存入log, 供回退后重新提交时处理
     for (Long applyId: applyIds) {
-      eabaxJdbc.update(Sqls.insRevertLog, new Object[] { applyId });
+      inteJdbc.update(Sqls.insRevertLog, new Object[] { applyId });
 
       //调用单据回退的webservice
       try {
