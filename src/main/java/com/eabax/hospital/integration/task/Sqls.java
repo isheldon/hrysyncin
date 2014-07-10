@@ -31,7 +31,7 @@ class Sqls {
   public static String insRevertLog = "insert into EabaxRevertLog (drawapply_id, is_handled) values (?, 0)";
   
   public static String selReturnJspActivities = 
-      "select * from JspActivity where is_apply = 1 and item_type = 2 and update_time > ? order by drawapply_id";
+      "select * from JspActivity where apply_type = 4 and is_apply = 1 and item_type = 2 and update_time > ? order by drawapply_id";
   
   public static String insInOutActivity =
       "insert into itemactivity (lngactivityid, lngactivitytypeid, lngreceipttypeid, lngtemplateid, "
