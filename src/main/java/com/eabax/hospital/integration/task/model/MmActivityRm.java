@@ -29,7 +29,8 @@ public class MmActivityRm implements RowMapper<MmActivity> {
     act.dataType = rs.getInt("data_type");
     act.itemNo = rs.getString("item_no");
     act.itemUnit = rs.getString("item_unit");
-    act.itemQty = rs.getInt("item_qyt");
+    //act.itemQty = rs.getInt("item_qyt"); 出库数量的字段为OutNum
+    act.itemQty = rs.getInt("OutNum");
     if (act.itemQty == 0) { act.itemQty = 1; } 
     // the following 2 fields are null, will get and calculate from eabax item table
     //act.itemPrice = rs.getBigDecimal("item_price");
